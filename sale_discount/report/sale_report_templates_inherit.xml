@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+
+     <template id="report_saleorder_document_second_discount_inherit" inherit_id="sale.report_saleorder_document">-->
+        <xpath expr="//table/thead/tr/th[@name='th_discount']" position="after">
+            <t t-set="display_sec_discount" t-value="any(l.second_discount for l in doc.order_line)"/>
+            <th name="th_sec_discount" t-if="display_sec_discount" class="text-right" groups="product.group_discount_per_so_line">
+                <span>2nd Disc.%</span>
+            </th>
+        </xpath>
+
+        <xpath expr="//table/tbody/t[2]/tr/t/td[@name='td_taxes']" position="before">
+            <td t-if="display_sec_discount" class="text-right" groups="product.group_discount_per_so_line">
+                <span t-field="line.second_discount"/>
+            </td>
+        </xpath>
+    </template>
+
+</odoo>
