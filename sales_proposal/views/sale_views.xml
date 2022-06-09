@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+<!-- Action View -->
+<record id="action_sale_proposal" model="ir.actions.act_window">
+<field name="name">Sale Proposal</field>
+<field name="type">ir.actions.act_window</field>
+<field name="res_model">sale.order</field>
+<field name="view_mode">form,tree</field>
+<field name="view_ids" eval="[(5, 0, 0),
+(0, 0, {'view_mode': 'tree', 'view_id': ref('sale_order_view_tree')}),
+(0, 0, {'view_mode': 'form', 'view_id': ref('sale_order_view_form')})]"/>
+<field name="context">{'default_order_type':'Proposal'}</field>
+<field name="domain">[("name","ilike",'Proposal')]</field>
+</record>
+
+<!--<?xml version="1.0" encoding="utf-8"?>-->
+<!--<odoo>-->
+
+<!--        &lt;!&ndash;Form view of sales Proposal&ndash;&gt;-->
+<!--        <record id="view_sales_proposal_inherit_form" model="ir.ui.view">-->
+<!--            <field name="name">sales.proposal.inherit.form</field>-->
+<!--            <field name="model">sale.order</field>-->
+<!--            <field name="inherit_id" ref="sale.view_order_form"/>-->
+<!--            <field name="mode">primary</field>-->
+<!--            <field name="arch" type="xml">-->
+<!--             <xpath expr="//page//group[@name='sales_person']/field[@name='tag_ids']" position="after">-->
+<!--                        <field name="proposal_status"/>-->
+<!--             </xpath>-->
+<!--                 <xpath expr="///field[@name='state']" position="attributes">-->
+<!--                        <attribute name="invisible">1</attribute>-->
+<!--                 </xpath>-->
+<!--                <xpath expr="//form/header/button[@name='action_draft']" position="after">-->
+<!--                    <field name="state_proposal" widget="statusbar"/>-->
+<!--                </xpath>-->
+<!--                <xpath expr="//page[@name='optional_products']" position="attributes">-->
+<!--                    <attribute name="invisible">1</attribute>-->
+<!--                </xpath>-->
+
+<!--                <xpath expr="//page[@name='other_information']" position="replace">-->
+<!--                    <page string="Other Info" name="other_information">-->
+<!--                    <field name="company_id" options="{'no_create': True}" groups="base.group_multi_company" invisible="1"/>-->
+<!--                    <field name="require_signature" invisible="1"/>-->
+<!--                    <field name="invoice_status" states="sale,done" groups="base.group_no_one" invisible="1"/>-->
+<!--                        <group>-->
+<!--                            <field name="proposal_status" readonly='True'/>-->
+<!--                        </group>-->
+<!--                        </page>-->
+<!--                    </xpath>-->
+<!--            </field>-->
+<!--        </record>-->
+
+
+<!--        &lt;!&ndash;Tree view of Sales Proposal&ndash;&gt;-->
+<!--          <record id="view_sales_proposal_inherit_tree" model="ir.ui.view">-->
+<!--            <field name="name">sales.proposal.tree</field>-->
+<!--            <field name="model">sale.order</field>-->
+<!--            <field name="inherit_id" ref="sale.view_quotation_tree"/>-->
+<!--              <field name="mode">primary</field>-->
+<!--            <field name="arch" type="xml">-->
+<!--                    <xpath expr="//tree" position="replace">-->
+<!--                        <tree string="Proposal" class="o_sale_order" sample="1" decoration-info="state in ['draft', 'sent']" decoration-muted="state == 'cancel'">-->
+<!--                            <field name="name" string="Number" readonly="1" decoration-bf="1"/>-->
+<!--                            <field name="state" invisible="1" decoration-success="state == 'sale' or state == 'done'" decoration-info="state == 'draft' or state == 'sent'" widget="badge" optional="show"/>-->
+<!--                            <field name="state_proposal"/>-->
+<!--                        </tree>-->
+<!--                    </xpath>-->
+<!--            </field>-->
+<!--        </record>-->
+
+<!--        &lt;!&ndash;Action sale_proposal&ndash;&gt;-->
+<!--        <record id="action_sale_proposal" model="ir.actions.act_window">-->
+<!--            <field name="name">Sales Proposals</field>-->
+<!--            <field name="type">ir.actions.act_window</field>-->
+<!--            <field name="res_model">sale.order</field>-->
+<!--            <field name="view_mode">form,tree</field>-->
+<!--            <field name="view_ids" eval="[(5, 0, 0),-->
+<!--                (0, 0, {'view_mode': 'tree', 'view_id': ref('view_sales_proposal_inherit_tree')}),-->
+<!--                (0, 0, {'view_mode': 'form', 'view_id': ref('view_sales_proposal_inherit_form')})]"/>-->
+<!--            <field name="context">{'default_order_type':'Proposal'}</field>-->
+<!--            <field name="domain">[("name","like",'Proposal')]</field>-->
+<!--            <field name="domain">-->
+<!--            </field>-->
+<!--        </record>-->
+
+
+        <menuitem  action="action_sale_proposal"
+                   id="menu_sale_proposal"
+                   name="Sale Proposal"
+                   parent="sale.sale_order_menu"
+                   sequence="5"/>
+</odoo>
+
