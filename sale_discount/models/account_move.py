@@ -21,16 +21,16 @@ class AccountMoveLine(models.Model):
     #         print("line2",line.second_discount)
     #         line.price_subtotal = (line.price_subtotal - line.price_subtotal * (line.second_discount / 100))
 
-    @api.model
-    def _get_price_total_and_subtotal_model(self, price_unit, quantity, discount, currency, product, partner, taxes, move_type):
-        res = super(AccountMoveLine, self)._get_price_total_and_subtotal_model(price_unit, quantity, discount, currency, product, partner, taxes, move_type)
-        for rec in self:
-            if rec.second_discount and discount:
-                print("previous total",rec.price_subtotal,rec.second_discount)
-                print("self discount previous")
-                rec['price_subtotal'] = (rec.price_subtotal - rec.price_subtotal * (rec.second_discount / 100))
-                print("After Subtotal",rec.price_subtotal,rec.second_discount)
-        return res
+    # @api.model
+    # def _get_price_total_and_subtotal_model(self, price_unit, quantity, discount, currency, product, partner, taxes, move_type):
+    #     res = super(AccountMoveLine, self)._get_price_total_and_subtotal_model(price_unit, quantity, discount, currency, product, partner, taxes, move_type)
+    #     for rec in self:
+    #         if rec.second_discount and discount:
+    #             print("previous total",rec.price_subtotal,rec.second_discount)
+    #             print("self discount previous")
+    #             rec['price_subtotal'] = (rec.price_subtotal - rec.price_subtotal * (rec.second_discount / 100))
+    #             print("After Subtotal",rec.price_subtotal,rec.second_discount)
+    #     return res
 
     # @api.model
     # def _get_price_total_and_subtotal_model(self, price_unit, quantity, discount, currency, product, partner, taxes, move_type):
