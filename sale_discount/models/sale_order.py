@@ -5,9 +5,6 @@ class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
     second_discount = fields.Float(string="2nd Disc. %")
-    currency_id = fields.Many2one(comodel_name='res.currency', string='currency')
-    price_subtotal = fields.Monetary(currency_field='currency_id', string='price total', store=True,
-                                     compute='_compute_amount')
 
     @api.depends('product_template_id', 'product_uom_qty', 'discount', 'price_unit', 'tax_id', 'second_discount')
     def _compute_amount(self):
