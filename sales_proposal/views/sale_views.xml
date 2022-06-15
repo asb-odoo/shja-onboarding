@@ -37,6 +37,13 @@
                         attrs="{'invisible': ['|',('state_proposal', 'in', ['draft','confirm']),('proposal_status','not in',['approved'])]}"/>
             </xpath>
 
+            <xpath expr="//form//button[@name='action_cancel'][1]" position="replace">
+                <button name="action_cancel"
+                        string="Cancel"
+                        type="object"
+                        attrs="{'invisible': ['|',('state_proposal', 'in', ['send']),('proposal_status','not in',['approved'])]}"/>
+            </xpath>
+
            <xpath expr="//form//button[@name='action_confirm'][2]" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
