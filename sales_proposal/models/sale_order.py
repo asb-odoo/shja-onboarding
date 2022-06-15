@@ -10,7 +10,7 @@ class SaleOrder(models.Model):
         ('send', 'Send'),
         ('confirm', 'Confirmed'),
         ('cancel', 'Cancelled')
-    ], string='Proposal_State', copy=False, index=True, default='draft')
+    ], string='Proposal_State', index=True,copy=False, default='draft')
     proposal_status = fields.Selection(
         [('not_approved', 'Not Approved'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='not_approved',
         copy=False,
@@ -24,6 +24,10 @@ class SaleOrder(models.Model):
 
     def action_approve(self):
         self.proposal_status = 'approved'
+        for rec in self.order_line:
+            rec.price_subtotal = rec.proposal_subtotal
+            rec.product_uom_qty = rec.accepted_quantity
+            rec.price_unit = rec.accepted_price
 
     def action_reject(self):
         self.proposal_status = 'rejected'
@@ -50,26 +54,22 @@ class SaleOrder(models.Model):
         return result
 
     def action_quotation_send(self):
-        ''' Opens a wizard to compose an email, with relevant mail template loaded by default '''
+        """
+        Opens a wizard to compose an email, with relevant mail template loaded by default
+        """
         super(SaleOrder, self).action_quotation_send()
         self.state_proposal = 'send'
         self.ensure_one()
         template_id = self._find_mail_template()
-        lang = self.env.context.get('lang')
-        template = self.env['mail.template'].browse(template_id)
-        if template.lang:
-            lang = template._render_lang(self.ids)[self.id]
+        self.env['mail.template'].browse(template_id)
         ctx = {
             'default_model': 'sale.order',
             'default_res_id': self.ids[0],
             'default_use_template': bool(template_id),
             'default_template_id': template_id,
-            'default_composition_mode': 'comment',
             'mark_so_as_sent': True,
-            'custom_layout': "mail.mail_notification_paynow",
             'proforma': self.env.context.get('proforma', False),
             'force_email': True,
-            'model_description': self.with_context(lang=lang).type_name,
         }
         return {
             'type': 'ir.actions.act_window',
@@ -85,9 +85,9 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    accepted_quantity = fields.Integer(string="Accepted Quantity", tracking=True)
-    accepted_price = fields.Float(string="Accepted Price", tracking=True)
-    proposal_subtotal = fields.Float(string="Proposal Subtotal", tracking=True, compute='_compute_proposal_subtotal')
+    accepted_quantity = fields.Integer(string="Accepted Quantity")
+    accepted_price = fields.Float(string="Accepted Price")
+    proposal_subtotal = fields.Float(string="Proposal Subtotal", compute='_compute_proposal_subtotal')
 
     @api.depends('accepted_quantity', 'accepted_price', 'tax_id')
     def _compute_proposal_subtotal(self):
@@ -105,31 +105,3 @@ class SaleOrderLine(models.Model):
             if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
                     'account.group_account_manager'):
                 line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
-
-    # @api.depends('accepted_quantity', 'discount', 'accepted_price', 'tax_id')
-    # def _compute_amount(self):
-    #     """
-    #     Compute the amounts of the SO line.
-    #     """
-    #     res = super(SaleOrderLine,self)._compute_amount()
-    #
-    #     if res:
-    #         res['price_subtotal'] = self.proposal_subtotal
-    #         res['product_uom_qty'] = self.accepted_quantity
-    #         res['price_unit'] = self.accepted_price
-    #
-    #     for line in self:
-    #         price = line.accepted_price * (1 - (line.discount or 0.0) / 100.0)
-    #         taxes = line.tax_id.compute_all(price, line.order_id.currency_id, line.accepted_quantity,
-    #                                         product=line.product_id, partner=line.order_id.partner_shipping_id)
-    #         line.update({
-    #             'price_tax': taxes['total_included'] - taxes['total_excluded'],
-    #             'price_total': taxes['total_included'],
-    #             'price_subtotal': taxes['total_excluded'],
-    #         })
-    #         if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
-    #                 'account.group_account_manager'):
-    #             line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
-    #
-    #         return res
-

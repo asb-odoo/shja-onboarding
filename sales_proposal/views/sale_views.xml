@@ -102,8 +102,7 @@
         <field name="mode">primary</field>
         <field name="arch" type="xml">
             <xpath expr="//tree" position="replace">
-                <tree string="Proposal" class="o_sale_order" sample="1" decoration-info="state in ['draft', 'sent']"
-                      decoration-muted="state == 'cancel'">
+                <tree string="Proposal"  sample="1" decoration-info="state in ['draft', 'send']">
                     <field name="name" string="Number" readonly="1" decoration-bf="1"/>
                     <field name="state" invisible="1" decoration-success="state == 'sale' or state == 'done'"
                            decoration-info="state == 'draft' or state == 'sent'" widget="badge" optional="show"/>
@@ -122,7 +121,7 @@
         <field name="view_ids" eval="[(5, 0, 0),
                  (0, 0, {'view_mode': 'tree', 'view_id': ref('sale_view_order_tree_inherit_sale_proposal')}),
                 (0, 0, {'view_mode': 'form', 'view_id': ref('sale_view_order_form_inherit_sale_proposal')})]"/>
-        <field name="context">{'default_order_type':'Proposal'}</field>
+<!--        <field name="context">{'default_order_type':'Proposal'}</field>-->
         <field name="domain">[("name","ilike",'Proposal')]</field>
     </record>
 

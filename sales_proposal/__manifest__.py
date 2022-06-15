@@ -4,7 +4,6 @@
     'summary':'sale_proposal',
     'description': """This module is used to manage the proposal of products to the
                                 customer """,
-    'sequence':-100,
     'category':'sale',
     'license': 'LGPL-3',
     'depends': ['sale_management','mail'],
