@@ -9,10 +9,11 @@ class SaleOrder(models.Model):
         ('draft', 'Draft'),
         ('send', 'Send'),
         ('confirm', 'Confirmed'),
-        ('cancel','Cancelled')
-    ], string='Proposal_State', copy=False, index=True, default='draft',tracking=True)
+        ('cancel', 'Cancelled')
+    ], string='Proposal_State', copy=False, index=True, default='draft')
     proposal_status = fields.Selection(
-        [('not_approved', 'Not Approved'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='not_approved',copy=False,
+        [('not_approved', 'Not Approved'), ('approved', 'Approved'), ('rejected', 'Rejected')], default='not_approved',
+        copy=False,
         readonly=True)
 
     def action_confirm(self):
@@ -29,7 +30,6 @@ class SaleOrder(models.Model):
         self.action_cancel()
         self.state_proposal = 'cancel'
         self.name = self.env['ir.sequence'].next_by_code('sale.order') or _('New')
-
 
     @api.model
     def create(self, vals):
@@ -85,6 +85,51 @@ class SaleOrder(models.Model):
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
 
-    accepted_quantity = fields.Integer(string="Accepted Quantity",tracking=True)
-    accepted_price = fields.Float(string="Accepted Price",tracking=True)
-    proposal_subtotal = fields.Float(string="Proposal Subtotal",tracking=True)
+    accepted_quantity = fields.Integer(string="Accepted Quantity", tracking=True)
+    accepted_price = fields.Float(string="Accepted Price", tracking=True)
+    proposal_subtotal = fields.Float(string="Proposal Subtotal", tracking=True, compute='_compute_proposal_subtotal')
+
+    @api.depends('accepted_quantity', 'accepted_price', 'tax_id')
+    def _compute_proposal_subtotal(self):
+        """
+        Compute the proposal_subtotal amount of the SO line.
+        """
+        for line in self:
+            taxes = line.tax_id.compute_all(line.accepted_price, line.order_id.currency_id, line.accepted_quantity,
+                                            product=line.product_id, partner=line.order_id.partner_shipping_id)
+            line.update({
+                'price_tax': taxes['total_included'] - taxes['total_excluded'],
+                'price_total': taxes['total_included'],
+                'proposal_subtotal': taxes['total_excluded'],
+            })
+            if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
+                    'account.group_account_manager'):
+                line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
+
+    # @api.depends('accepted_quantity', 'discount', 'accepted_price', 'tax_id')
+    # def _compute_amount(self):
+    #     """
+    #     Compute the amounts of the SO line.
+    #     """
+    #     res = super(SaleOrderLine,self)._compute_amount()
+    #
+    #     if res:
+    #         res['price_subtotal'] = self.proposal_subtotal
+    #         res['product_uom_qty'] = self.accepted_quantity
+    #         res['price_unit'] = self.accepted_price
+    #
+    #     for line in self:
+    #         price = line.accepted_price * (1 - (line.discount or 0.0) / 100.0)
+    #         taxes = line.tax_id.compute_all(price, line.order_id.currency_id, line.accepted_quantity,
+    #                                         product=line.product_id, partner=line.order_id.partner_shipping_id)
+    #         line.update({
+    #             'price_tax': taxes['total_included'] - taxes['total_excluded'],
+    #             'price_total': taxes['total_included'],
+    #             'price_subtotal': taxes['total_excluded'],
+    #         })
+    #         if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
+    #                 'account.group_account_manager'):
+    #             line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
+    #
+    #         return res
+

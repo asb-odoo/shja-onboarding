@@ -7,7 +7,7 @@
     'sequence':-100,
     'category':'sale',
     'license': 'LGPL-3',
-    'depends': ['sale_management'],
+    'depends': ['sale_management','mail'],
     'data': [
         'data/ir_sequence_data.xml',
         'views/sale_views.xml',
