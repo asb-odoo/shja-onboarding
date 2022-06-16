@@ -128,7 +128,6 @@
         <field name="view_ids" eval="[(5, 0, 0),
                  (0, 0, {'view_mode': 'tree', 'view_id': ref('sale_view_order_tree_inherit_sale_proposal')}),
                 (0, 0, {'view_mode': 'form', 'view_id': ref('sale_view_order_form_inherit_sale_proposal')})]"/>
-<!--        <field name="context">{'default_order_type':'Proposal'}</field>-->
         <field name="domain">[("name","ilike",'Proposal')]</field>
     </record>
 
