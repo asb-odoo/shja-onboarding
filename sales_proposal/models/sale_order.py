@@ -43,13 +43,6 @@ class SaleOrder(models.Model):
             vals['name'] = 'Proposal' + '/' + str(datetime.now().year) + '/' + str(
                 datetime.now().strftime('%b')) + '/' + str(
                 self.env['ir.sequence'].next_by_code('sale.proposal') or _('New'))
-
-        if any(f not in vals for f in ['partner_invoice_id', 'partner_shipping_id', 'pricelist_id']):
-            partner = self.env['res.partner'].browse(vals.get('partner_id'))
-            addr = partner.address_get(['delivery', 'invoice'])
-            vals['partner_invoice_id'] = vals.setdefault('partner_invoice_id', addr['invoice'])
-            vals['partner_shipping_id'] = vals.setdefault('partner_shipping_id', addr['delivery'])
-            vals['pricelist_id'] = vals.setdefault('pricelist_id', partner.property_product_pricelist.id)
         result = super(SaleOrder, self).create(vals)
         return result
 
@@ -57,29 +50,8 @@ class SaleOrder(models.Model):
         """
         Opens a wizard to compose an email, with relevant mail template loaded by default
         """
-        super(SaleOrder, self).action_quotation_send()
         self.state_proposal = 'send'
-        self.ensure_one()
-        template_id = self._find_mail_template()
-        self.env['mail.template'].browse(template_id)
-        ctx = {
-            'default_model': 'sale.order',
-            'default_res_id': self.ids[0],
-            'default_use_template': bool(template_id),
-            'default_template_id': template_id,
-            'mark_so_as_sent': True,
-            'proforma': self.env.context.get('proforma', False),
-            'force_email': True,
-        }
-        return {
-            'type': 'ir.actions.act_window',
-            'view_mode': 'form',
-            'res_model': 'mail.compose.message',
-            'views': [(False, 'form')],
-            'view_id': False,
-            'target': 'new',
-            'context': ctx,
-        }
+        return super(SaleOrder, self).action_quotation_send()
 
 
 class SaleOrderLine(models.Model):
@@ -102,6 +74,4 @@ class SaleOrderLine(models.Model):
                 'price_total': taxes['total_included'],
                 'proposal_subtotal': taxes['total_excluded'],
             })
-            if self.env.context.get('import_file', False) and not self.env.user.user_has_groups(
-                    'account.group_account_manager'):
-                line.tax_id.invalidate_cache(['invoice_repartition_line_ids'], [line.tax_id.id])
+

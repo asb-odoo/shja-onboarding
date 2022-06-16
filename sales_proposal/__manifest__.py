@@ -6,7 +6,7 @@
                                 customer """,
     'category':'sale',
     'license': 'LGPL-3',
-    'depends': ['sale_management','mail'],
+    'depends': ['sale_management'],
     'data': [
         'data/ir_sequence_data.xml',
         'views/sale_views.xml',
